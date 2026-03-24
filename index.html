@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>思考框架圖書館</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #242836;
+    --border: #2e3345;
+    --text: #e4e6ed;
+    --text-dim: #8b8fa3;
+    --accent-munger: #f59e0b;
+    --accent-feynman: #3b82f6;
+    --accent-taleb: #ef4444;
+    --accent-meadows: #10b981;
+    --accent-active: #a78bfa;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  .header {
+    padding: 2.5rem 2rem 1.5rem;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    background: linear-gradient(180deg, #161825 0%, var(--bg) 100%);
+  }
+  .header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    margin-bottom: 0.5rem;
+  }
+  .header p {
+    color: var(--text-dim);
+    font-size: 0.95rem;
+  }
+
+  /* Search */
+  .search-wrap {
+    max-width: 560px;
+    margin: 1.5rem auto 0;
+    position: relative;
+  }
+  .search-wrap svg {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-dim);
+  }
+  #search {
+    width: 100%;
+    padding: 0.75rem 1rem 0.75rem 2.6rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color .2s;
+  }
+  #search:focus { border-color: var(--accent-active); }
+  #search::placeholder { color: var(--text-dim); }
+
+  /* Layout */
+  .container {
+    display: flex;
+    max-width: 1280px;
+    margin: 0 auto;
+    min-height: calc(100vh - 180px);
+  }
+
+  /* Sidebar */
+  .sidebar {
+    width: 260px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    padding: 1.5rem 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+  .sidebar-section {
+    margin-bottom: 1.2rem;
+  }
+  .sidebar-section-title {
+    padding: 0 1.2rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+  }
+  .thinker-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    width: 100%;
+    padding: 0.6rem 1.2rem;
+    border: none;
+    background: transparent;
+    color: var(--text);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background .15s;
+    text-align: left;
+  }
+  .thinker-btn:hover { background: var(--surface); }
+  .thinker-btn.active { background: var(--surface2); font-weight: 600; }
+  .thinker-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .framework-link {
+    display: block;
+    padding: 0.4rem 1.2rem 0.4rem 2.6rem;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    text-decoration: none;
+    cursor: pointer;
+    transition: color .15s, background .15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+  }
+  .framework-link:hover { color: var(--text); background: var(--surface); }
+  .framework-link.active { color: var(--accent-active); }
+
+  /* Main content */
+  .main {
+    flex: 1;
+    padding: 2rem 2.5rem;
+    overflow-y: auto;
+    max-height: 100vh;
+  }
+
+  /* Thinker header card */
+  .thinker-header {
+    padding: 2rem;
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  .thinker-header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .thinker-header h2 {
+    font-size: 1.6rem;
+    margin-bottom: 0.3rem;
+  }
+  .thinker-header .quote {
+    font-style: italic;
+    color: var(--text-dim);
+    font-size: 0.92rem;
+    margin-bottom: 1rem;
+    padding-left: 1rem;
+    border-left: 2px solid var(--border);
+  }
+  .thinker-header .philosophy {
+    font-size: 0.92rem;
+    color: var(--text-dim);
+    line-height: 1.8;
+  }
+
+  /* Framework cards */
+  .framework-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.8rem;
+    margin-bottom: 1.5rem;
+    transition: border-color .2s;
+  }
+  .framework-card:hover { border-color: #3e4460; }
+  .framework-card h3 {
+    font-size: 1.15rem;
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .framework-card h3 .num {
+    font-size: 0.75rem;
+    padding: 0.15rem 0.55rem;
+    border-radius: 6px;
+    background: var(--surface2);
+    color: var(--text-dim);
+  }
+  .framework-card p {
+    font-size: 0.9rem;
+    margin-bottom: 0.8rem;
+    color: var(--text);
+    line-height: 1.8;
+  }
+  .framework-card .subtitle {
+    font-weight: 600;
+    font-size: 0.88rem;
+    margin: 1rem 0 0.4rem;
+    color: var(--text);
+  }
+  .framework-card ul {
+    padding-left: 1.2rem;
+    margin-bottom: 0.8rem;
+  }
+  .framework-card li {
+    font-size: 0.88rem;
+    margin-bottom: 0.35rem;
+    color: var(--text);
+    line-height: 1.7;
+  }
+  .framework-card table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.8rem 0;
+    font-size: 0.85rem;
+  }
+  .framework-card th {
+    text-align: left;
+    padding: 0.5rem 0.8rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    font-weight: 600;
+    font-size: 0.82rem;
+  }
+  .framework-card td {
+    padding: 0.5rem 0.8rem;
+    border: 1px solid var(--border);
+    font-size: 0.85rem;
+  }
+
+  /* Usage table */
+  .usage-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.8rem;
+    margin-bottom: 1.5rem;
+  }
+  .usage-card h3 { font-size: 1.05rem; margin-bottom: 1rem; }
+
+  /* Tag for cross-reference */
+  .tag {
+    display: inline-block;
+    font-size: 0.72rem;
+    padding: 0.15rem 0.5rem;
+    border-radius: 5px;
+    margin-left: 0.3rem;
+    vertical-align: middle;
+  }
+
+  /* Search highlight */
+  mark {
+    background: rgba(167, 139, 250, 0.3);
+    color: var(--text);
+    border-radius: 2px;
+    padding: 0 2px;
+  }
+
+  .no-results {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-dim);
+    font-size: 0.95rem;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .container { flex-direction: column; }
+    .sidebar {
+      width: 100%;
+      height: auto;
+      position: static;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      flex-wrap: wrap;
+      padding: 1rem;
+      gap: 0.5rem;
+    }
+    .sidebar-section { margin-bottom: 0; }
+    .sidebar-section-title { display: none; }
+    .framework-link { display: none; }
+    .thinker-btn { width: auto; padding: 0.5rem 1rem; border-radius: 8px; border: 1px solid var(--border); }
+    .thinker-btn.active { background: var(--surface2); border-color: var(--accent-active); }
+    .main { padding: 1.5rem; max-height: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>思考框架圖書館</h1>
+  <p>四位思想家的核心思維模型 — 搜尋、瀏覽、交叉參照</p>
+  <div class="search-wrap">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+    <input type="text" id="search" placeholder="搜尋關鍵字（例：反脆弱、第一性原理、逆向思維…）">
+  </div>
+</div>
+
+<div class="container">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main class="main" id="main"></main>
+</div>
+
+<script>
+const DATA = [
+  {
+    id: "munger",
+    name: "Charlie Munger",
+    color: "#f59e0b",
+    quote: "反過來想，總是反過來想。",
+    quoteSource: "引自數學家 Jacobi",
+    philosophy: "Munger 認為，大多數人一輩子只用少數幾個思維模型在理解世界，這就像只拿一把錘子——看什麼都像釘子。真正的智慧來自跨學科的「心智模型格柵」（Latticework of Mental Models），讓你能從多個鏡頭審視同一個問題。",
+    frameworks: [
+      {
+        title: "心智模型格柵",
+        subtitle: "Latticework of Mental Models",
+        content: "從多個學科中提取核心概念，編織成一張互相關聯的思考網路。世界上的智慧不會全部集中在某一個學術領域裡，你需要從心理學、經濟學、物理學、生物學、數學、歷史等多個學科中，各取最重要的幾個模型。單一模型會讓你盲目；多個模型交叉使用，才能看見全貌。",
+        keyModels: [
+          { field: "數學", models: "複利效應、機率思維、排列組合" },
+          { field: "心理學", models: "認知偏誤、激勵機制、社會認同" },
+          { field: "經濟學", models: "機會成本、規模經濟、競爭優勢" },
+          { field: "物理學", models: "臨界質量、慣性、均衡" },
+          { field: "生物學", models: "演化、適者生存、生態位" },
+          { field: "工程學", models: "冗餘設計、斷裂點、反饋迴路" }
+        ],
+        application: "遇到問題時，不要只從自己的專業出發。刻意問自己：「如果從心理學角度看呢？從經濟學角度看呢？從生物學角度看呢？」"
+      },
+      {
+        title: "逆向思維",
+        subtitle: "Inversion",
+        content: "不要只想「怎樣才能成功」，先想「怎樣一定會失敗」，然後避開那些行為。",
+        steps: ["定義你想達成的目標", "反過來問：「如果我想確保失敗，我該怎麼做？」", "列出所有保證失敗的行為和決策", "系統性地避免這些行為"],
+        examples: ["想要幸福的人生？→ 先問：什麼一定會讓人不幸福？（嫉妒、怨恨、過度消費、不守信用……）→ 避開這些", "想做出好的投資？→ 先問：什麼一定會虧錢？（追逐熱門、槓桿過高、不做功課……）→ 避開這些"],
+        why: "人類對「避免損失」比「追求收益」更敏感。逆向思維利用了這個心理特性，讓你更容易發現盲點。",
+        crossRef: [{ name: "Taleb", tag: "否定法" }]
+      },
+      {
+        title: "人類誤判心理學",
+        subtitle: "Psychology of Human Misjudgment",
+        content: "Munger 整理出 25 種導致人類做出錯誤判斷的心理傾向，建議像清單一樣逐一檢查。",
+        biases: [
+          { name: "激勵偏誤", desc: "永遠不要低估激勵機制的力量。人們會做被獎勵的事，而非正確的事。分析任何情境時，先問：「誰的利益在裡面？」" },
+          { name: "社會認同", desc: "當不確定時，人傾向於模仿周圍人的行為。在群體中特別危險，因為大家可能都在模仿彼此，沒有人真正在思考。" },
+          { name: "確認偏誤", desc: "人傾向於尋找支持自己已有信念的資訊，忽略矛盾的證據。" },
+          { name: "損失厭惡", desc: "失去 100 元的痛苦，大於得到 100 元的快樂。這讓人做出不理性的決定。" },
+          { name: "錨定效應", desc: "最先接觸到的資訊會不成比例地影響後續判斷。" },
+          { name: "Lollapalooza 效應", desc: "最重要的：當多種偏誤同時作用時，效果不是相加，而是相乘。現實中的重大誤判幾乎都是多種偏誤疊加的結果。" }
+        ],
+        crossRef: [{ name: "Taleb", tag: "切身利害" }]
+      },
+      {
+        title: "能力圈",
+        subtitle: "Circle of Competence",
+        content: "知道自己知道什麼，更重要的是知道自己不知道什麼。",
+        steps: ["誠實評估自己真正深入了解的領域（能力圈內）", "在能力圈內大膽行動，因為你有真正的判斷力", "在能力圈外保持謙虛，不要假裝自己懂", "持續擴大能力圈，但承認擴張需要時間"],
+        why: "很多人把「聽過」和「懂了」搞混。真正在能力圈內，意味著你理解一件事的細微之處、例外情況、以及它可能出錯的方式。",
+        crossRef: [{ name: "Feynman", tag: "智識誠實" }]
+      },
+      {
+        title: "清單思維",
+        subtitle: "Checklist Approach",
+        content: "面對重大決策，用清單系統性地檢查可能的錯誤。",
+        steps: ["先用逆向思維列出所有可能的失敗原因", "逐一檢查 25 種心理偏誤是否在影響你", "確認你是否在自己的能力圈內", "用多個心智模型從不同角度審視", "如果以上都通過，才值得行動"],
+        why: "直覺在熟悉的領域有用，但在複雜和陌生的情境中，系統性的清單遠比直覺可靠。"
+      },
+      {
+        title: "耐心與紀律",
+        subtitle: "Patience and Discipline",
+        content: "大錢不是在買入和賣出中賺到的，而是在等待中賺到的。不需要每天都做決策，大部分時間應該在學習和等待。只在真正有把握的機會出現時才出手。避免為了行動而行動（Activity Bias）。長期複利的力量遠大於短期投機。",
+        crossRef: [{ name: "Taleb", tag: "林迪效應" }]
+      }
+    ],
+    usageTable: [
+      { situation: "做重大決策", frameworks: "逆向思維 + 清單思維 + 能力圈" },
+      { situation: "分析一個商業模式", frameworks: "心智模型格柵（多學科交叉）" },
+      { situation: "判斷別人的建議是否可信", frameworks: "激勵偏誤 + 能力圈" },
+      { situation: "避免跟風", frameworks: "社會認同偏誤 + 逆向思維" },
+      { situation: "投資或職涯選擇", frameworks: "耐心與紀律 + 逆向思維" },
+      { situation: "自我檢查盲點", frameworks: "25 種心理偏誤清單" }
+    ]
+  },
+  {
+    id: "feynman",
+    name: "Richard Feynman",
+    color: "#3b82f6",
+    quote: "我能創造的，我才能理解。",
+    quoteSource: "",
+    philosophy: "Feynman 的思考方式建立在一個信念上：真正的理解不是記住結論，而是能從最基礎的事實出發，自己推導出答案。他認為自己不是特別聰明，而是擁有更好的「思考工具箱」。",
+    frameworks: [
+      {
+        title: "第一性原理思考",
+        subtitle: "First Principles Thinking",
+        content: "不接受任何未經檢驗的假設。從最基本的事實出發，重新推導結論。",
+        steps: ["面對一個問題時，先問：「我們確定知道什麼？」", "把所有「常識」和「權威說法」暫時擱置", "從最基礎、無法再拆解的事實開始重建理解", "每一步推論都要問：「這一步的根據是什麼？」"],
+        application: "當你發現自己在重複別人的觀點卻說不出為什麼時，就該回到第一性原理。"
+      },
+      {
+        title: "費曼學習法",
+        subtitle: "The Feynman Technique",
+        content: "如果你不能用簡單的語言解釋一件事，代表你還沒真正理解它。",
+        steps: ["選擇一個概念 — 寫下你想理解的主題", "用白話教出來 — 假裝你在教一個完全不懂的人", "找到卡住的地方 — 解釋不下去之處就是理解有缺口的地方", "回去補強，再教一次 — 填補空白後重新解釋"],
+        why: "Feynman 的標準是——你應該能讓一個六年級學生聽懂。如果做不到，不是對方太笨，是你的理解還不夠透徹。"
+      },
+      {
+        title: "12 個最愛的問題",
+        subtitle: "12 Favorite Problems",
+        content: "隨時在腦中保持 12 個你最關心的未解問題。每當接觸到新知識，就拿來和這些問題碰撞。",
+        steps: ["列出 12 個你長期關心、橫跨不同領域的大問題", "這些問題不需要有即時答案，可以是「人生級」的謎題", "每次學到新東西，問自己：「這對我的 12 個問題有幫助嗎？」", "偶爾就會發現某個新知識恰好是解開某個問題的鑰匙"],
+        why: "這讓你的學習不再散漫，每一次吸收新知都有方向性。Feynman 在不同領域間的跨界突破，很大程度來自這個方法。",
+        crossRef: [{ name: "Munger", tag: "心智模型格柵" }]
+      },
+      {
+        title: "不知道筆記本",
+        subtitle: "Notebook of Things I Don't Know",
+        content: "在普林斯頓求學時，Feynman 開了一本筆記本，封面寫著「我不知道的事情」。",
+        steps: ["坦誠面對自己的知識盲區，把不懂的東西寫下來", "逐一拆解每個不懂的領域，試著用自己的話重新組裝", "尋找知識之間的原始接縫和不一致之處", "持續更新——隨著理解加深，舊問題會消失，新問題會出現"],
+        why: "承認無知不是弱點，而是學習的起點。",
+        crossRef: [{ name: "Munger", tag: "能力圈" }]
+      },
+      {
+        title: "多元工具箱",
+        subtitle: "Mental Toolbox",
+        content: "面對問題時，不要只用一種方法。嘗試多種角度、多種工具。遇到問題不只套用一個公式或一種思路，嘗試代數方法、幾何直覺、物理類比、極端情況推演等多種途徑。如果一條路走不通，換一條——不是換問題，而是換攻擊方式。",
+        crossRef: [{ name: "Munger", tag: "心智模型格柵" }]
+      },
+      {
+        title: "智識誠實",
+        subtitle: "Intellectual Honesty",
+        content: "首要原則是你不能欺騙自己——而你是最容易被自己欺騙的人。",
+        steps: ["永遠區分「我知道」和「我以為我知道」", "勇於說「我不知道」，這不丟臉", "檢驗自己的論點時，要像檢驗對手的論點一樣嚴格", "如果證據和你的信念衝突，改的是信念，不是忽略證據"],
+        crossRef: [{ name: "Taleb", tag: "切身利害" }]
+      }
+    ],
+    usageTable: [
+      { situation: "學習新領域", frameworks: "費曼學習法 + 不知道筆記本" },
+      { situation: "解決複雜問題", frameworks: "第一性原理 + 多元工具箱" },
+      { situation: "保持長期成長", frameworks: "12 個最愛的問題" },
+      { situation: "做重大決策", frameworks: "智識誠實 + 第一性原理" },
+      { situation: "檢驗自己是否真懂", frameworks: "費曼學習法（試著教別人）" }
+    ]
+  },
+  {
+    id: "taleb",
+    name: "Nassim Taleb",
+    color: "#ef4444",
+    quote: "風會吹熄蠟燭，卻能使火焰更旺。你要成為火焰，渴望風的到來。",
+    quoteSource: "",
+    philosophy: "Taleb 的核心關注是：我們活在一個充滿不確定性的世界，但人類的大腦和制度都傾向於假裝世界是可預測的。他認為，真正的智慧不是更準確地預測未來，而是建構一個「不需要預測也能活得好」的系統。",
+    frameworks: [
+      {
+        title: "反脆弱",
+        subtitle: "Antifragility",
+        content: "世界上的事物分為三類：脆弱的（受衝擊會變差）、強韌的（受衝擊不變）、反脆弱的（受衝擊反而變強）。",
+        threeTypes: [
+          { type: "脆弱", trait: "討厭波動、衝擊、不確定性", metaphor: "瓷杯——掉下去就碎" },
+          { type: "強韌", trait: "對波動無感", metaphor: "石頭——掉下去沒事" },
+          { type: "反脆弱", trait: "從波動中獲益", metaphor: "九頭蛇——砍掉一個頭長出兩個" }
+        ],
+        steps: ["讓自己暴露在小的壓力和挑戰中，避免被保護得太好", "確保下行風險有限，但上行空間無限", "系統性地從錯誤和失敗中學習，把每次挫折轉化為資訊"],
+        application: "職涯選擇、投資組合設計、個人健康、組織管理——任何你希望「越挫越勇」的領域。",
+        crossRef: [{ name: "Meadows", tag: "系統思考" }]
+      },
+      {
+        title: "黑天鵝",
+        subtitle: "Black Swan",
+        content: "極端罕見但影響巨大的事件主導了歷史的走向，而我們幾乎無法預測它們。",
+        steps: ["事前幾乎不可能預測（超出正常預期範圍）", "發生後產生巨大的影響", "事後人們會編造故事，假裝它其實是可以預見的（後見之明偏誤）"],
+        examples: ["不要相信任何聲稱能預測未來的模型或專家", "把精力放在「萬一發生時我是否能承受」，而非「它會不會發生」", "讓自己多暴露在正面黑天鵝的可能性中"],
+        why: "Munger 說要待在能力圈內做判斷；Taleb 說即使在能力圈內，你仍然可能遇到無法預見的事。兩者互補。",
+        crossRef: [{ name: "Munger", tag: "能力圈" }, { name: "Meadows", tag: "延遲效應" }]
+      },
+      {
+        title: "槓鈴策略",
+        subtitle: "Barbell Strategy",
+        content: "不要走中間路線。把資源分配在兩個極端：極度保守 + 極度冒險，跳過中間地帶。",
+        steps: ["把 85-90% 的資源放在極度安全的地方", "把 10-15% 放在高風險、高回報的機會上", "完全避開「中等風險、中等回報」的選項"],
+        examples: ["閱讀：讀經典 + 讀最新的，跳過暢銷書中間那些", "職涯：穩定的主業 + 業餘的瘋狂副業", "學習：深耕一個專業 + 廣泛涉獵不相關的領域"],
+        why: "最壞情況下只損失 10-15%，生活不受影響。最好情況下回報可能是爆炸性的。中間路線在黑天鵝事件中最脆弱。"
+      },
+      {
+        title: "切身利害",
+        subtitle: "Skin in the Game",
+        content: "不要信任不承擔後果的人的判斷。做決策的人必須承擔決策的後果，否則系統會腐壞。",
+        steps: ["評估建議時，先問：「給我建議的人，如果建議錯了，他會損失什麼？」", "如果答案是「什麼也不會損失」，大幅降低對這個建議的信任度", "自己做決策時，確保你也有 skin in the game"],
+        why: "Munger 說要看「誰的利益在裡面」，Taleb 更進一步——不只看利益，還要看「誰會承擔損失」。有利益但不承擔損失的人最危險。",
+        crossRef: [{ name: "Munger", tag: "激勵偏誤" }, { name: "Feynman", tag: "智識誠實" }]
+      },
+      {
+        title: "林迪效應",
+        subtitle: "Lindy Effect",
+        content: "對於不會自然死亡的事物（書、技術、觀念），它已經存活的時間越長，預期剩餘壽命就越長。",
+        examples: ["一本已經流傳 100 年的書，預期還能再流傳 100 年", "面對資訊過載時，優先讀經過時間檢驗的經典", "判斷建議的價值，看它是古老的智慧還是最近才流行的說法"],
+        crossRef: [{ name: "Munger", tag: "耐心與紀律" }]
+      },
+      {
+        title: "否定法",
+        subtitle: "Via Negativa",
+        content: "做得更好的方式往往不是增加什麼，而是移除什麼。我們更確定什麼是「錯的」，而非什麼是「對的」。減少愚蠢比增加聰明更有效。",
+        examples: ["健康：先戒掉明確有害的東西，而非追逐超級食物", "決策：先排除明顯糟糕的選項，而非尋找完美選項", "生活：先移除浪費時間的舊習慣，而非不斷增加新習慣"],
+        crossRef: [{ name: "Munger", tag: "逆向思維" }]
+      }
+    ],
+    usageTable: [
+      { situation: "投資或資源分配", frameworks: "槓鈴策略 + 反脆弱" },
+      { situation: "評估他人建議", frameworks: "切身利害 + 否定法" },
+      { situation: "面對不確定的未來", frameworks: "黑天鵝 + 反脆弱" },
+      { situation: "選擇要學什麼、讀什麼", frameworks: "林迪效應 + 槓鈴策略" },
+      { situation: "設計個人或組織的韌性", frameworks: "反脆弱 + 否定法" },
+      { situation: "判斷趨勢是否可靠", frameworks: "林迪效應" }
+    ]
+  },
+  {
+    id: "meadows",
+    name: "Donella Meadows",
+    color: "#10b981",
+    quote: "記住，所有模型都是錯的。問題在於它們錯得有多離譜，以及它們是否仍然有用。",
+    quoteSource: "",
+    philosophy: "Meadows 認為，我們大多數人看世界的方式是線性的——A 導致 B，解決問題就是找到那個「原因」然後修正它。但現實世界是由無數相互連結的反饋迴路組成的系統。如果你不理解系統的結構，你的「解決方案」很可能會讓問題更糟。她的思考方式讓你從「修零件」升級到「看全局」。",
+    frameworks: [
+      {
+        title: "系統思考基本功",
+        subtitle: "Systems Thinking Basics",
+        content: "世界不是一條條因果鏈，而是一張張反饋網路。系統由三個基本組成：元素（看得見的組成部分）、連結（關係和資訊流）、功能或目的（系統整體要達成什麼）。",
+        why: "系統的行為主要由結構和連結決定，而非由個別元素決定。換掉系統裡的人，如果結構不變，結果通常也不會變。這就是為什麼「換掉領導人」很少能真正改變一個組織。"
+      },
+      {
+        title: "反饋迴路",
+        subtitle: "Feedback Loops",
+        content: "所有動態行為的根源都是反饋迴路——輸出回過頭來影響輸入。",
+        twoLoops: [
+          { type: "增強迴路", desc: "變化會自我放大，越來越快。", posEx: "口碑 → 更多顧客 → 更多口碑", negEx: "恐慌 → 拋售 → 價格下跌 → 更多恐慌", trait: "指數級增長或崩潰，「滾雪球效應」" },
+          { type: "平衡迴路", desc: "系統會自動調節，趨向某個目標。", posEx: "體溫偏高 → 流汗 → 降溫 → 回到 37°C", negEx: "庫存不足 → 加速生產 → 庫存回升 → 減緩生產", trait: "系統會抵抗你的改變" }
+        ],
+        why: "很多人推動改變卻看不到效果，是因為他們在跟一個平衡迴路對抗。你以為在解決問題，系統卻在暗中把你的努力抵消掉。",
+        crossRef: [{ name: "Taleb", tag: "反脆弱" }]
+      },
+      {
+        title: "延遲效應",
+        subtitle: "Delays",
+        content: "系統中的反饋幾乎都有延遲，而延遲是造成振盪和誤判的主要原因。行動和結果之間總是有時間差。延遲會讓人過度反應——因為看不到效果就加大力度，結果矯枉過正。",
+        examples: ["政策效果需要時間顯現，但人們沒有耐心，急著換新政策", "投資的回報有延遲，讓人在最不該放棄的時候放棄", "環境破壞的後果有延遲，等看到結果時已經很難逆轉"],
+        application: "做任何改變時，先問：「這個系統的反饋延遲是多久？」然後給自己足夠的時間觀察效果。",
+        crossRef: [{ name: "Munger", tag: "耐心與紀律" }]
+      },
+      {
+        title: "系統基模",
+        subtitle: "System Archetypes",
+        content: "反覆出現的系統行為模式。認識這些模式，就能更快診斷問題。",
+        archetypes: [
+          { name: "飲鴆止渴", desc: "短期解法在長期製造更大的問題。止痛藥解決頭痛，但掩蓋了真正的病因。", tip: "警惕任何「見效很快」的解法。" },
+          { name: "公地悲劇", desc: "每個個體追求自身利益，卻導致共享資源的崩潰。", tip: "需要明確的使用規則或反饋機制。" },
+          { name: "成長上限", desc: "增強迴路推動成長，但遲早碰到平衡迴路，成長就停滯。", tip: "不要只加大油門，去找那個限制因素並解除它。" },
+          { name: "轉嫁負擔", desc: "依賴外部解法（治標），讓內部解決問題的能力（治本）逐漸萎縮。", tip: "刻意投資長期的根本解法。" }
+        ],
+        crossRef: [{ name: "Taleb", tag: "否定法" }]
+      },
+      {
+        title: "槓桿點",
+        subtitle: "Leverage Points",
+        content: "系統中並非所有介入點的效果都一樣。大多數人把精力花在低效槓桿上，但真正改變系統行為的是高效槓桿。",
+        leverageLevels: [
+          { level: "低效", desc: "調整參數（數字）、調整緩衝區大小", note: "容易做，但影響最小" },
+          { level: "中效", desc: "改變資訊流、改變規則、改變自組織能力", note: "讓系統能自我調適" },
+          { level: "高效", desc: "改變系統的目標、改變範式、超越範式", note: "最難做但效果最大" }
+        ],
+        crossRef: [{ name: "Munger", tag: "心智模型格柵" }]
+      },
+      {
+        title: "系統智慧",
+        subtitle: "Systems Wisdom",
+        content: "Meadows 晚年整理的一組實踐原則，幫助人在系統中更有智慧地行動。",
+        principles: [
+          "與系統共舞，而非強行控制——在干預之前，先觀察系統自然的行為節奏",
+          "尊重資訊——系統問題的根源往往是資訊的缺失、延遲或扭曲。透明度本身就是最強的改變力量之一",
+          "擁抱複雜性——不要試圖把複雜系統簡化成簡單的因果故事。保持系統的多樣性——多樣性是韌性的來源"
+        ],
+        crossRef: [{ name: "Feynman", tag: "智識誠實" }, { name: "Taleb", tag: "反脆弱" }]
+      }
+    ],
+    usageTable: [
+      { situation: "推動改變卻看不到效果", frameworks: "反饋迴路 + 延遲效應" },
+      { situation: "問題反覆出現、越修越糟", frameworks: "系統基模（飲鴆止渴、轉嫁負擔）" },
+      { situation: "決定在哪裡投入精力最有效", frameworks: "槓桿點" },
+      { situation: "理解為什麼「好人」做出「壞結果」", frameworks: "系統結構決定行為" },
+      { situation: "團隊或組織的成長停滯", frameworks: "系統基模（成長上限）" },
+      { situation: "面對無法完全掌控的複雜局面", frameworks: "系統智慧" }
+    ]
+  }
+];
+
+let currentThinker = DATA[0];
+let searchTerm = '';
+
+function escapeHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function highlight(text) {
+  if (!searchTerm) return escapeHtml(text);
+  const escaped = escapeHtml(text);
+  const regex = new RegExp(`(${searchTerm.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
+  return escaped.replace(regex, '<mark>$1</mark>');
+}
+
+function textMatches(text) {
+  if (!searchTerm) return true;
+  return text.toLowerCase().includes(searchTerm.toLowerCase());
+}
+
+function thinkerMatches(t) {
+  if (!searchTerm) return true;
+  const s = searchTerm.toLowerCase();
+  if (t.name.toLowerCase().includes(s)) return true;
+  if (t.philosophy.toLowerCase().includes(s)) return true;
+  if (t.quote.toLowerCase().includes(s)) return true;
+  for (const f of t.frameworks) {
+    if (f.title.toLowerCase().includes(s) || (f.subtitle||'').toLowerCase().includes(s) || f.content.toLowerCase().includes(s)) return true;
+    if (f.why && f.why.toLowerCase().includes(s)) return true;
+    if (f.application && f.application.toLowerCase().includes(s)) return true;
+    if (f.steps && f.steps.some(st => st.toLowerCase().includes(s))) return true;
+    if (f.examples && f.examples.some(e => e.toLowerCase().includes(s))) return true;
+    if (f.biases && f.biases.some(b => b.name.toLowerCase().includes(s) || b.desc.toLowerCase().includes(s))) return true;
+    if (f.principles && f.principles.some(p => p.toLowerCase().includes(s))) return true;
+    if (f.archetypes && f.archetypes.some(a => a.name.toLowerCase().includes(s) || a.desc.toLowerCase().includes(s))) return true;
+  }
+  for (const u of t.usageTable) {
+    if (u.situation.toLowerCase().includes(s) || u.frameworks.toLowerCase().includes(s)) return true;
+  }
+  return false;
+}
+
+function frameworkMatches(f) {
+  if (!searchTerm) return true;
+  const s = searchTerm.toLowerCase();
+  const texts = [f.title, f.subtitle||'', f.content, f.why||'', f.application||''];
+  if (f.steps) texts.push(...f.steps);
+  if (f.examples) texts.push(...f.examples);
+  if (f.biases) f.biases.forEach(b => texts.push(b.name, b.desc));
+  if (f.principles) texts.push(...f.principles);
+  if (f.archetypes) f.archetypes.forEach(a => texts.push(a.name, a.desc, a.tip));
+  return texts.some(t => t.toLowerCase().includes(s));
+}
+
+function renderSidebar() {
+  const sb = document.getElementById('sidebar');
+  let html = '<div class="sidebar-section"><div class="sidebar-section-title">思想家</div>';
+  for (const t of DATA) {
+    const matched = thinkerMatches(t);
+    if (searchTerm && !matched) continue;
+    const active = t.id === currentThinker.id ? ' active' : '';
+    html += `<button class="thinker-btn${active}" data-id="${t.id}"><span class="thinker-dot" style="background:${t.color}"></span>${t.name}</button>`;
+    if (t.id === currentThinker.id) {
+      for (let i = 0; i < t.frameworks.length; i++) {
+        const f = t.frameworks[i];
+        if (searchTerm && !frameworkMatches(f)) continue;
+        html += `<button class="framework-link" data-idx="${i}">${f.title}</button>`;
+      }
+    }
+  }
+  html += '</div>';
+  sb.innerHTML = html;
+
+  sb.querySelectorAll('.thinker-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentThinker = DATA.find(t => t.id === btn.dataset.id);
+      render();
+    });
+  });
+  sb.querySelectorAll('.framework-link').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const el = document.getElementById('fw-' + btn.dataset.idx);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+}
+
+function renderCrossRefs(refs) {
+  if (!refs || !refs.length) return '';
+  return refs.map(r => `<span class="tag" style="background:${DATA.find(t=>t.name.includes(r.name))?.color||'#666'}22;color:${DATA.find(t=>t.name.includes(r.name))?.color||'#888'}">${r.name} · ${r.tag}</span>`).join(' ');
+}
+
+function renderFramework(f, idx) {
+  let html = `<div class="framework-card" id="fw-${idx}">`;
+  html += `<h3><span class="num">${idx+1}</span> ${highlight(f.title)}`;
+  if (f.subtitle) html += ` <span style="color:var(--text-dim);font-weight:400;font-size:0.85rem">${highlight(f.subtitle)}</span>`;
+  html += `</h3>`;
+  html += `<p>${highlight(f.content)}</p>`;
+
+  if (f.threeTypes) {
+    html += '<table><tr><th>類型</th><th>特性</th><th>比喻</th></tr>';
+    f.threeTypes.forEach(t => { html += `<tr><td>${highlight(t.type)}</td><td>${highlight(t.trait)}</td><td>${highlight(t.metaphor)}</td></tr>`; });
+    html += '</table>';
+  }
+  if (f.keyModels) {
+    html += '<table><tr><th>學科</th><th>重要模型</th></tr>';
+    f.keyModels.forEach(m => { html += `<tr><td>${highlight(m.field)}</td><td>${highlight(m.models)}</td></tr>`; });
+    html += '</table>';
+  }
+  if (f.twoLoops) {
+    f.twoLoops.forEach(l => {
+      html += `<div class="subtitle">${highlight(l.type)}</div><p>${highlight(l.desc)}</p>`;
+      html += `<ul><li>正面：${highlight(l.posEx)}</li><li>負面：${highlight(l.negEx)}</li><li>特徵：${highlight(l.trait)}</li></ul>`;
+    });
+  }
+  if (f.leverageLevels) {
+    html += '<table><tr><th>層級</th><th>介入方式</th><th>備註</th></tr>';
+    f.leverageLevels.forEach(l => { html += `<tr><td>${highlight(l.level)}</td><td>${highlight(l.desc)}</td><td>${highlight(l.note)}</td></tr>`; });
+    html += '</table>';
+  }
+  if (f.archetypes) {
+    f.archetypes.forEach(a => {
+      html += `<div class="subtitle">${highlight(a.name)}</div><p>${highlight(a.desc)}</p><p style="color:var(--text-dim);font-size:0.85rem">💡 ${highlight(a.tip)}</p>`;
+    });
+  }
+  if (f.biases) {
+    f.biases.forEach(b => {
+      html += `<div class="subtitle">${highlight(b.name)}</div><p>${highlight(b.desc)}</p>`;
+    });
+  }
+  if (f.steps) {
+    html += '<ul>';
+    f.steps.forEach(s => { html += `<li>${highlight(s)}</li>`; });
+    html += '</ul>';
+  }
+  if (f.examples) {
+    html += `<div class="subtitle">範例</div><ul>`;
+    f.examples.forEach(e => { html += `<li>${highlight(e)}</li>`; });
+    html += '</ul>';
+  }
+  if (f.principles) {
+    html += '<ul>';
+    f.principles.forEach(p => { html += `<li>${highlight(p)}</li>`; });
+    html += '</ul>';
+  }
+  if (f.why) html += `<p style="color:var(--text-dim);font-size:0.88rem;margin-top:0.5rem"><strong>為什麼有效：</strong>${highlight(f.why)}</p>`;
+  if (f.application) html += `<p style="color:var(--text-dim);font-size:0.88rem"><strong>應用：</strong>${highlight(f.application)}</p>`;
+  if (f.crossRef) html += `<div style="margin-top:0.8rem">↔ ${renderCrossRefs(f.crossRef)}</div>`;
+  html += '</div>';
+  return html;
+}
+
+function renderMain() {
+  const main = document.getElementById('main');
+  const t = currentThinker;
+
+  if (searchTerm && !thinkerMatches(t)) {
+    const match = DATA.find(d => thinkerMatches(d));
+    if (match) { currentThinker = match; renderSidebar(); renderMain(); return; }
+    main.innerHTML = '<div class="no-results">沒有找到符合的結果，試試其他關鍵字？</div>';
+    return;
+  }
+
+  let html = `<div class="thinker-header" style="background:${t.color}08">
+    <div style="position:absolute;top:0;left:0;right:0;height:3px;background:${t.color}"></div>
+    <h2>${highlight(t.name)}</h2>
+    <div class="quote">「${highlight(t.quote)}」${t.quoteSource ? ' — ' + highlight(t.quoteSource) : ''}</div>
+    <div class="philosophy">${highlight(t.philosophy)}</div>
+  </div>`;
+
+  t.frameworks.forEach((f, i) => {
+    if (searchTerm && !frameworkMatches(f)) return;
+    html += renderFramework(f, i);
+  });
+
+  html += `<div class="usage-card"><h3>日常應用速查</h3><table><tr><th>情境</th><th>適用框架</th></tr>`;
+  t.usageTable.forEach(u => {
+    if (searchTerm && !textMatches(u.situation) && !textMatches(u.frameworks)) return;
+    html += `<tr><td>${highlight(u.situation)}</td><td>${highlight(u.frameworks)}</td></tr>`;
+  });
+  html += '</table></div>';
+
+  main.innerHTML = html;
+}
+
+function render() { renderSidebar(); renderMain(); }
+
+document.getElementById('search').addEventListener('input', (e) => {
+  searchTerm = e.target.value.trim();
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
