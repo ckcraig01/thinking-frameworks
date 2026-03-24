@@ -23,8 +23,9 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
     background: var(--bg);
     color: var(--text);
-    line-height: 1.7;
+    line-height: 1.8;
     min-height: 100vh;
+    font-size: 17px;
   }
 
   /* Header */
@@ -35,14 +36,14 @@
     background: linear-gradient(180deg, #161825 0%, var(--bg) 100%);
   }
   .header h1 {
-    font-size: 2rem;
+    font-size: 2.4rem;
     font-weight: 700;
     letter-spacing: 0.02em;
     margin-bottom: 0.5rem;
   }
   .header p {
     color: var(--text-dim);
-    font-size: 0.95rem;
+    font-size: 1.05rem;
   }
 
   /* Search */
@@ -65,7 +66,7 @@
     border: 1px solid var(--border);
     background: var(--surface);
     color: var(--text);
-    font-size: 0.95rem;
+    font-size: 1.05rem;
     outline: none;
     transition: border-color .2s;
   }
@@ -111,7 +112,7 @@
     border: none;
     background: transparent;
     color: var(--text);
-    font-size: 0.9rem;
+    font-size: 1rem;
     cursor: pointer;
     transition: background .15s;
     text-align: left;
@@ -126,7 +127,7 @@
   .framework-link {
     display: block;
     padding: 0.4rem 1.2rem 0.4rem 2.6rem;
-    font-size: 0.82rem;
+    font-size: 0.92rem;
     color: var(--text-dim);
     text-decoration: none;
     cursor: pointer;
@@ -163,19 +164,19 @@
     height: 3px;
   }
   .thinker-header h2 {
-    font-size: 1.6rem;
+    font-size: 1.8rem;
     margin-bottom: 0.3rem;
   }
   .thinker-header .quote {
     font-style: italic;
     color: var(--text-dim);
-    font-size: 0.92rem;
+    font-size: 1.02rem;
     margin-bottom: 1rem;
     padding-left: 1rem;
     border-left: 2px solid var(--border);
   }
   .thinker-header .philosophy {
-    font-size: 0.92rem;
+    font-size: 1.02rem;
     color: var(--text-dim);
     line-height: 1.8;
   }
@@ -191,7 +192,7 @@
   }
   .framework-card:hover { border-color: #3e4460; }
   .framework-card h3 {
-    font-size: 1.15rem;
+    font-size: 1.3rem;
     margin-bottom: 0.8rem;
     display: flex;
     align-items: center;
@@ -205,14 +206,14 @@
     color: var(--text-dim);
   }
   .framework-card p {
-    font-size: 0.9rem;
+    font-size: 1.02rem;
     margin-bottom: 0.8rem;
     color: var(--text);
     line-height: 1.8;
   }
   .framework-card .subtitle {
     font-weight: 600;
-    font-size: 0.88rem;
+    font-size: 1rem;
     margin: 1rem 0 0.4rem;
     color: var(--text);
   }
@@ -221,8 +222,8 @@
     margin-bottom: 0.8rem;
   }
   .framework-card li {
-    font-size: 0.88rem;
-    margin-bottom: 0.35rem;
+    font-size: 1rem;
+    margin-bottom: 0.4rem;
     color: var(--text);
     line-height: 1.7;
   }
@@ -230,7 +231,7 @@
     width: 100%;
     border-collapse: collapse;
     margin: 0.8rem 0;
-    font-size: 0.85rem;
+    font-size: 0.95rem;
   }
   .framework-card th {
     text-align: left;
@@ -238,12 +239,12 @@
     background: var(--surface2);
     border: 1px solid var(--border);
     font-weight: 600;
-    font-size: 0.82rem;
+    font-size: 0.95rem;
   }
   .framework-card td {
     padding: 0.5rem 0.8rem;
     border: 1px solid var(--border);
-    font-size: 0.85rem;
+    font-size: 0.95rem;
   }
 
   /* Usage table */
@@ -699,7 +700,7 @@ function renderCrossRefs(refs) {
 function renderFramework(f, idx) {
   let html = `<div class="framework-card" id="fw-${idx}">`;
   html += `<h3><span class="num">${idx+1}</span> ${highlight(f.title)}`;
-  if (f.subtitle) html += ` <span style="color:var(--text-dim);font-weight:400;font-size:0.85rem">${highlight(f.subtitle)}</span>`;
+  if (f.subtitle) html += ` <span style="color:var(--text-dim);font-weight:400;font-size:0.95rem">${highlight(f.subtitle)}</span>`;
   html += `</h3>`;
   html += `<p>${highlight(f.content)}</p>`;
 
@@ -726,7 +727,7 @@ function renderFramework(f, idx) {
   }
   if (f.archetypes) {
     f.archetypes.forEach(a => {
-      html += `<div class="subtitle">${highlight(a.name)}</div><p>${highlight(a.desc)}</p><p style="color:var(--text-dim);font-size:0.85rem">💡 ${highlight(a.tip)}</p>`;
+      html += `<div class="subtitle">${highlight(a.name)}</div><p>${highlight(a.desc)}</p><p style="color:var(--text-dim);font-size:0.95rem">💡 ${highlight(a.tip)}</p>`;
     });
   }
   if (f.biases) {
@@ -749,8 +750,8 @@ function renderFramework(f, idx) {
     f.principles.forEach(p => { html += `<li>${highlight(p)}</li>`; });
     html += '</ul>';
   }
-  if (f.why) html += `<p style="color:var(--text-dim);font-size:0.88rem;margin-top:0.5rem"><strong>為什麼有效：</strong>${highlight(f.why)}</p>`;
-  if (f.application) html += `<p style="color:var(--text-dim);font-size:0.88rem"><strong>應用：</strong>${highlight(f.application)}</p>`;
+  if (f.why) html += `<p style="color:var(--text-dim);font-size:1rem;margin-top:0.5rem"><strong>為什麼有效：</strong>${highlight(f.why)}</p>`;
+  if (f.application) html += `<p style="color:var(--text-dim);font-size:1rem"><strong>應用：</strong>${highlight(f.application)}</p>`;
   if (f.crossRef) html += `<div style="margin-top:0.8rem">↔ ${renderCrossRefs(f.crossRef)}</div>`;
   html += '</div>';
   return html;
