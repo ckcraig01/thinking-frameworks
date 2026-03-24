@@ -276,6 +276,47 @@
     padding: 0 2px;
   }
 
+  /* Bio card */
+  .bio-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem 1.8rem;
+    margin-bottom: 1.5rem;
+    font-size: 0.95rem;
+    color: var(--text-dim);
+    line-height: 1.9;
+  }
+  .bio-card .bio-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+    margin-bottom: 0.5rem;
+    opacity: 0.7;
+  }
+
+  /* Back to top */
+  .back-to-top {
+    display: block;
+    width: 100%;
+    padding: 1rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    cursor: pointer;
+    text-align: center;
+    transition: background .2s, color .2s;
+  }
+  .back-to-top:hover {
+    background: var(--surface2);
+    color: var(--text);
+  }
+
   .no-results {
     text-align: center;
     padding: 4rem 2rem;
@@ -328,6 +369,7 @@ const DATA = [
     id: "munger",
     name: "Charlie Munger",
     color: "#f59e0b",
+    bio: "Charlie Munger（1924–2023），波克夏海瑟威副董事長，巴菲特長達六十年的合夥人。律師出身，後轉向投資，以跨學科的思維方式聞名。他主張從心理學、數學、物理學等多個學科中汲取智慧，用「心智模型格柵」來做出更好的決策。代表著作為《窮查理的普通常識》（Poor Charlie's Almanack）。",
     quote: "反過來想，總是反過來想。",
     quoteSource: "引自數學家 Jacobi",
     philosophy: "Munger 認為，大多數人一輩子只用少數幾個思維模型在理解世界，這就像只拿一把錘子——看什麼都像釘子。真正的智慧來自跨學科的「心智模型格柵」（Latticework of Mental Models），讓你能從多個鏡頭審視同一個問題。",
@@ -404,6 +446,7 @@ const DATA = [
     id: "feynman",
     name: "Richard Feynman",
     color: "#3b82f6",
+    bio: "Richard Feynman（1918–1988），美國理論物理學家，1965 年諾貝爾物理學獎得主，以量子電動力學的貢獻聞名。他參與過曼哈頓計畫，後在加州理工學院任教數十年。以驚人的直覺、幽默感和對「真正理解」的執著著稱，被譽為二十世紀最有影響力的物理學家之一。代表著作包括《乖乖，乃曼先生！》和《別鬧了，費曼先生！》。",
     quote: "我能創造的，我才能理解。",
     quoteSource: "",
     philosophy: "Feynman 的思考方式建立在一個信念上：真正的理解不是記住結論，而是能從最基礎的事實出發，自己推導出答案。他認為自己不是特別聰明，而是擁有更好的「思考工具箱」。",
@@ -464,6 +507,7 @@ const DATA = [
     id: "taleb",
     name: "Nassim Taleb",
     color: "#ef4444",
+    bio: "Nassim Nicholas Taleb（1960–），黎巴嫩裔美國學者、統計學家、前華爾街交易員。曾在多家投行擔任衍生性金融商品交易員，後轉為學術研究與寫作。他的核心研究領域是隨機性、機率和不確定性。以 Incerto 系列五部曲聞名，包括《黑天鵝效應》、《反脆弱》和《不對稱陷阱》，影響了金融、風險管理和哲學等多個領域。",
     quote: "風會吹熄蠟燭，卻能使火焰更旺。你要成為火焰，渴望風的到來。",
     quoteSource: "",
     philosophy: "Taleb 的核心關注是：我們活在一個充滿不確定性的世界，但人類的大腦和制度都傾向於假裝世界是可預測的。他認為，真正的智慧不是更準確地預測未來，而是建構一個「不需要預測也能活得好」的系統。",
@@ -534,6 +578,7 @@ const DATA = [
     id: "meadows",
     name: "Donella Meadows",
     color: "#10b981",
+    bio: "Donella H. Meadows（1941–2001），美國環境科學家、系統思考先驅、達特茅斯學院教授。她是 1972 年經典報告《成長的極限》（The Limits to Growth）的主要作者，該報告首次用電腦模擬預測了人口與資源的長期趨勢，引發全球關注。她的遺作《系統思考》（Thinking in Systems）是系統動力學領域最廣為閱讀的入門書，影響了政策制定者、企業管理者和教育工作者。",
     quote: "記住，所有模型都是錯的。問題在於它們錯得有多離譜，以及它們是否仍然有用。",
     quoteSource: "",
     philosophy: "Meadows 認為，我們大多數人看世界的方式是線性的——A 導致 B，解決問題就是找到那個「原因」然後修正它。但現實世界是由無數相互連結的反饋迴路組成的系統。如果你不理解系統的結構，你的「解決方案」很可能會讓問題更糟。她的思考方式讓你從「修零件」升級到「看全局」。",
@@ -631,6 +676,7 @@ function thinkerMatches(t) {
   const s = searchTerm.toLowerCase();
   if (t.name.toLowerCase().includes(s)) return true;
   if (t.philosophy.toLowerCase().includes(s)) return true;
+  if (t.bio && t.bio.toLowerCase().includes(s)) return true;
   if (t.quote.toLowerCase().includes(s)) return true;
   for (const f of t.frameworks) {
     if (f.title.toLowerCase().includes(s) || (f.subtitle||'').toLowerCase().includes(s) || f.content.toLowerCase().includes(s)) return true;
@@ -776,6 +822,10 @@ function renderMain() {
     <div class="philosophy">${highlight(t.philosophy)}</div>
   </div>`;
 
+  if (t.bio) {
+    html += `<div class="bio-card"><div class="bio-label">人物簡介</div>${highlight(t.bio)}</div>`;
+  }
+
   t.frameworks.forEach((f, i) => {
     if (searchTerm && !frameworkMatches(f)) return;
     html += renderFramework(f, i);
@@ -787,6 +837,8 @@ function renderMain() {
     html += `<tr><td>${highlight(u.situation)}</td><td>${highlight(u.frameworks)}</td></tr>`;
   });
   html += '</table></div>';
+
+  html += `<button class="back-to-top" onclick="document.querySelector('.main').scrollTo({top:0,behavior:'smooth'})">↑ 回到頂端</button>`;
 
   main.innerHTML = html;
 }
